@@ -104,27 +104,34 @@ end)
 ## Scaffold
 
 ```lua
-local names = {"DeathKiller19386"}  -- your username
+local names = {"DeathKiller19386"}
 
-while task.wait() do
-    for _, player in PlayerService.getPlayers() do
-        local ent = player:getEntity()
-        if not ent then continue end
-        
-        local isProtected = false
-        for _, name in names do
-            if player.name == name then
-                isProtected = true
-                break
-            end
+while task.wait(0.1) do
+    local player = PlayerService.getLocalPlayer()
+    if not player then continue end
+    
+    local isMe = false
+    for _, name in names do
+        if player.name == name then
+            isMe = true
+            break
         end
-        if isProtected then continue end
-        
-        local pos = ent:getPosition() - Vector3.new(0,5,0)
-        if BlockService.getBlockAt(pos) then
-            BlockService.destroyBlock(pos)
+    end
+    
+    if not isMe then continue end
+    
+    local ent = player:getEntity()
+    if not ent then continue end
+    
+    local pos = ent:getPosition()
+    local checkPos = pos - Vector3.new(0, 10, 0)
+    
+    local blockBelow = BlockService.getBlockAt(pos - Vector3.new(0, 1, 0))
+    
+    if pos.Y > 50 or pos.Y < -10 then
+        if not blockBelow and not BlockService.getBlockAt(checkPos) then
+            BlockService.placeBlock(ItemType.WOOL_WHITE, pos - Vector3.new(0, 1, 0))
         end
-        BlockService.placeBlock(ItemType.WOOL_WHITE, pos)
     end
 end
 ```

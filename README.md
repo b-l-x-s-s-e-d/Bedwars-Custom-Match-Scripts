@@ -1,5 +1,7 @@
 # Custom Match Scripts
 
+These scripts work ONLY in the Roblox Bedwars Custom Game Script tab. It CANNOT get you banned, and it is NOT going to work outside of Roblox Bedwars
+
 ## Aimbot
 ```lua
 Events.ProjectileLaunched(function(event)

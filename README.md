@@ -181,24 +181,23 @@ end)
 # Reach
 
 ```lua
-local REACH = 25
+local YOUR_NAME = "DeathKiller19386"
 
-while task.wait() do
-    local lp = PlayerService.LocalPlayer
-    if not lp then continue end
-    
-    for _, p in PlayerService.getPlayers() do
-        if p == lp then continue end
-        
-        local char = p.Character
-        if not char then continue end
-        
-        local root = char:FindFirstChild("HumanoidRootPart")
-        if root then
-            root.Size = Vector3.new(REACH, 6, REACH)
+task.spawn(function()
+    while task.wait(0.5) do
+        for _, player in PlayerService.getPlayers() do
+            if player.name == YOUR_NAME then continue end
+            
+            local char = player.Character
+            if not char then continue end
+            
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if root then
+                root.Size = Vector3.new(25, 6, 25)
+            end
         end
     end
-end
+end)
 ```
 
 ## Spider

@@ -183,7 +183,7 @@ end)
 print("[Scaffold ALWAYS ON] Loaded for " .. YOUR_NAME .. " - blocks under feet")
 ```
 
-## Godmode / Antihit
+## GodMode / AntiHit
 
 ```lua
 local YOUR_NAME = "DeathKiller19386"

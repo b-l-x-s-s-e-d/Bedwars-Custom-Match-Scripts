@@ -3,47 +3,51 @@
 ## Aimbot
 ```lua
 Events.ProjectileLaunched(function(event)
-    if (event.shooter == nil) then
+    if event.shooter == nil then return end
+    
+    local proj = event.projectileType
+    if proj ~= "arrow" and proj ~= "crossbow_arrow" and proj ~= "tactical_crossbow_arrow" and 
+       proj ~= "headhunter_arrow" and proj ~= "tactical_headhunter_arrow" then
         return
     end
-    if (event.projectileType == "arrow") or (event.projectileType == "crossbow_arrow") or (event.projectileType == "tactical_crossbow_arrow") or (event.projectileType == "headhunter_arrow") or (event.projectileType == "tactical_headhunter_arrow") then
-
-        local player = event.shooter:getPlayer()
-        if player.name == "DeathKiller19386" then -- Insert Your Username Here
-            local target = 0
-            local targetDistance = 100000
-            for i, enemy in PlayerService.getPlayers() do
-                local enemyPosition = enemy:getEntity():getPosition()
-                local playerPosition = player:getEntity():getPosition()
-                local distance = (enemyPosition - playerPosition).magnitude
-                if ((distance < targetDistance) and (enemy.name ~= "DeathKiller19386")) then -- Insert Your Username Here
-                    target = enemy
-                    targetDistance = distance
-                end
-            end
-            if (event.projectileType == "arrow") then
-                CombatService.damage(target:getEntity(), 25)
-            elseif (event.projectileType == "crossbow_arrow") then
-                CombatService.damage(target:getEntity(), 35)
-            elseif (event.projectileType == "tactical_crossbow_arrow") then
-                CombatService.damage(target:getEntity(), 50)
-            elseif (event.projectileType == "tactical_headhunter_arrow") then
-                CombatService.damage(target:getEntity(), 60)
-            end
+    
+    local player = event.shooter:getPlayer()
+    if player.name ~= "DeathKiller19386" then return end  -- your username
+    
+    local closest = nil
+    local bestDist = 999999
+    
+    for _, p in PlayerService.getPlayers() do
+        if p.name == player.name then continue end
+        local ent = p:getEntity()
+        if not ent then continue end
+        
+        local dist = (ent:getPosition() - player:getEntity():getPosition()).Magnitude
+        if dist < bestDist then
+            closest = ent
+            bestDist = dist
         end
     end
+    
+    if not closest then return end
+    
+    local dmg = 25
+    if proj == "crossbow_arrow" then dmg = 35
+    elseif proj == "tactical_crossbow_arrow" then dmg = 50
+    elseif proj:find("headhunter") then dmg = 60 end
+    
+    CombatService.damage(closest, dmg)
 end)
 ```
 
 ## Anti-Void
 
 ```lua
-local YOUR_NAME = "DeathKiller19386"
-local voidThreshold = nil
-local lastSafePos = nil
-local player = nil
+local YOUR_NAME = "DeathKiller19386"  -- your username
 
-for _, p in pairs(PlayerService.getPlayers()) do
+local player, voidY, safePos
+
+for _, p in PlayerService.getPlayers() do
     if p.name == YOUR_NAME then
         player = p
         break
@@ -51,10 +55,9 @@ for _, p in pairs(PlayerService.getPlayers()) do
 end
 
 if player then
-    local entity = player:getEntity()
-    local spawnPos = entity:getPosition()
-    voidThreshold = spawnPos.Y - 20
-    lastSafePos = spawnPos
+    local pos = player:getEntity():getPosition()
+    voidY = pos.Y - 20
+    safePos = pos
 end
 
 task.spawn(function()
@@ -66,131 +69,72 @@ task.spawn(function()
             if not player then continue end
         end
         
-        local entity = player:getEntity()
-        if not entity then continue end
+        local ent = player:getEntity()
+        if not ent then continue end
         
-        local currPos = entity:getPosition()
-        local currY = currPos.Y
+        local pos = ent:getPosition()
         
-        if currY < voidThreshold then
-            if lastSafePos then
-                local bouncePos = lastSafePos + Vector3.new(0, 5, 0)
-                entity:setPosition(bouncePos)
-                if entity.setVelocity then
-                    entity:setVelocity(Vector3.new(0, 0, 0))
+        if pos.Y < voidY then
+            if safePos then
+                ent:setPosition(safePos + Vector3.new(0,5,0))
+                if ent.setVelocity then
+                    ent:setVelocity(Vector3.zero)
                 end
             end
         else
-            local belowPos = currPos - Vector3.new(0, 5, 0)
-            local blockBelow = BlockService.getBlockAt(belowPos)
-            if blockBelow then
-                lastSafePos = Vector3.new(currPos.X, currPos.Y, currPos.Z)
+            local below = pos - Vector3.new(0,5,0)
+            if BlockService.getBlockAt(below) then
+                safePos = pos
             end
         end
     end
 end)
 
 Events.EntityDamage:Connect(function(event)
-    local targetPlayer = event.target:getPlayer()
-    if targetPlayer and targetPlayer.name == YOUR_NAME then
-        local pos = event.target:getPosition()
-        if (event.amount or 0) > 30 or pos.Y < (voidThreshold or 0) then
-            event.amount = 0
-            CombatService.heal(event.target, 50)
-        end
+    local tp = event.target:getPlayer()
+    if tp and tp.name == YOUR_NAME and (event.amount > 30 or event.target:getPosition().Y < voidY) then
+        event.amount = 0
+        CombatService.heal(event.target, 50)
     end
 end)
-
-print("[COMPACT LAND BOUNCE] Loaded for " .. YOUR_NAME)
 ```
 
 ## Scaffold
 
 ```lua
--- Scaffold ALWAYS ON for DeathKiller19386
--- Places wool blocks under your feet constantly while moving
--- Visual feedback: chat message on start + particles on placed blocks
+local names = {"DeathKiller19386"}  -- your username
 
-local YOUR_NAME = "DeathKiller19386"
-local BLOCK_TYPE = "wool_white"   -- Change to "wool_red", "obsidian", "stone", etc.
-local PLACE_DELAY = 0.08          -- Smoother = lower number, but don't go below ~0.05 to avoid lag/kick
-local PARTICLE_COLOR = Color3.fromRGB(255, 255, 255)
-
--- Get player & entity
-local player = nil
-for _, p in PlayerService.getPlayers() do
-    if p.name == YOUR_NAME then
-        player = p
-        break
-    end
-end
-
-if not player then
-    print("[Scaffold] Player not found: " .. YOUR_NAME)
-    return
-end
-
-local entity = player:getEntity()
-if not entity then
-    print("[Scaffold] Entity not found")
-    return
-end
-
--- One-time startup message
-player:sendMessage("§aScaffold ALWAYS ON - blocks placed under feet")
-
--- Main scaffold placement loop
-task.spawn(function()
-    while true do
-        task.wait(PLACE_DELAY)
+while task.wait() do
+    for _, player in PlayerService.getPlayers() do
+        local ent = player:getEntity()
+        if not ent then continue end
         
-        local pos = entity:getPosition()
-        
-        -- Calculate position directly under feet
-        local placePos = Vector3.new(
-            math.floor(pos.X + 0.5),
-            math.floor(pos.Y - 1.5),   -- -1.5 usually perfect for under feet
-            math.floor(pos.Z + 0.5)
-        )
-        
-        -- Skip if block already exists there (prevents spam/replace)
-        if not BlockService.getBlockAt(placePos) then
-            BlockService.placeBlock(placePos, BLOCK_TYPE, player)
-            
-            -- Visual particle effect on placed block
-            local part = Instance.new("Part")
-            part.Size = Vector3.new(1,1,1)
-            part.Position = placePos + Vector3.new(0.5, 0.5, 0.5)
-            part.Anchored = true
-            part.CanCollide = false
-            part.Transparency = 1
-            part.Parent = workspace
-            
-            local particle = Instance.new("ParticleEmitter")
-            particle.Color = ColorSequence.new(PARTICLE_COLOR)
-            particle.Lifetime = NumberRange.new(0.5, 0.8)
-            particle.Rate = 25
-            particle.Speed = NumberRange.new(4, 8)
-            particle.SpreadAngle = Vector2.new(360, 360)
-            particle.Enabled = true
-            particle.Parent = part
-            
-            game.Debris:AddItem(part, 0.9)  -- Clean up quickly
+        local isProtected = false
+        for _, name in names do
+            if player.name == name then
+                isProtected = true
+                break
+            end
         end
+        if isProtected then continue end
+        
+        local pos = ent:getPosition() - Vector3.new(0,5,0)
+        if BlockService.getBlockAt(pos) then
+            BlockService.destroyBlock(pos)
+        end
+        BlockService.placeBlock(ItemType.WOOL_WHITE, pos)
     end
-end)
-
-print("[Scaffold ALWAYS ON] Loaded for " .. YOUR_NAME .. " - blocks under feet")
+end
 ```
 
 ## GodMode / AntiHit
 
 ```lua
-local YOUR_NAME = "DeathKiller19386"
+local YOUR_NAME = "DeathKiller19386"  -- your username
 
 Events.EntityDamage(function(event)
-    local tp = event.entity:getPlayer()
-    if tp and tp.name == YOUR_NAME then
+    local p = event.entity:getPlayer()
+    if p and p.name == YOUR_NAME then
         event.cancelled = true
         event.damage = 0
     end
@@ -200,53 +144,98 @@ end)
 ## KillAura
 
 ```lua
--- ULTIMATE KILL AURA for DeathKiller19386 - Attacks ALL entities (players, titans, mobs, bhan, etc.)
--- Uses EntityService.getNearbyEntities() for ALL damageable targets
+local YOUR_NAME = "DeathKiller19386"  -- your username
+local RANGE = 18
+local DPS = 10
+local DELAY = 0.3
 
-local YOUR_NAME = "DeathKiller19386"
-local RANGE = 18          -- Melee range (studs)
-local DAMAGE = 10        -- Damage per swing
-local SWING_DELAY = 0.3  -- Auto-swing speed (lower = faster DPS)
-
-local myPlayer = nil
-
--- Cache player on load/respawn
-Events.PlayerAdded(function(event)
-    if event.player.name == YOUR_NAME then
-        myPlayer = event.player
-        print("[Kill Aura] Player cached: " .. YOUR_NAME)
-    end
-end)
-
--- Initial cache
+local me
 for _, p in PlayerService.getPlayers() do
-    if p.name == YOUR_NAME then
-        myPlayer = p
-        break
-    end
+    if p.name == YOUR_NAME then me = p break end
 end
-
-if not myPlayer then return end
 
 task.spawn(function()
     while true do
-        task.wait(SWING_DELAY)
+        task.wait(DELAY)
+        if not me then continue end
         
-        local myEntity = myPlayer:getEntity()
-        if not myEntity or not myEntity:isAlive() then continue end
+        local ent = me:getEntity()
+        if not ent or not ent:isAlive() then continue end
         
-        local myPos = myEntity:getPosition()
-        local nearbyEntities = EntityService.getNearbyEntities(myPos, RANGE)
+        local pos = ent:getPosition()
+        local targets = EntityService.getNearbyEntities(pos, RANGE)
         
-        if nearbyEntities then
-            for _, target in ipairs(nearbyEntities) do
-                if target ~= myEntity and target:isAlive() and target:getPlayer() ~= myPlayer then
-                    CombatService.damage(target, DAMAGE, myEntity)
-                    print("[Kill Aura] Swung " .. DAMAGE .. " dmg on entity (" .. math.floor((target:getPosition() - myPos).magnitude) .. " studs)")
-                    break  -- Hit nearest first, or remove to hit all
-                end
+        for _, t in targets or {} do
+            if t == ent or not t:isAlive() then continue end
+            local tp = t:getPlayer()
+            if tp and tp ~= me then
+                CombatService.damage(t, DPS, ent)
+                break
             end
         end
     end
 end)
+```
+# Reach
+
+```lua
+local REACH = 25
+
+while task.wait() do
+    local lp = PlayerService.LocalPlayer
+    if not lp then continue end
+    
+    for _, p in PlayerService.getPlayers() do
+        if p == lp then continue end
+        
+        local char = p.Character
+        if not char then continue end
+        
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if root then
+            root.Size = Vector3.new(REACH, 6, REACH)
+        end
+    end
+end
+```
+
+## Spider
+
+```lua
+local CLIMB_SPEED = 50
+local YOUR_NAME = "DeathKiller19386"  -- your username
+
+local me
+for _, p in PlayerService.getPlayers() do
+    if p.name == YOUR_NAME then me = p break end
+end
+
+while task.wait() do
+    if not me then continue end
+    
+    local char = me.Character
+    if not char then continue end
+    
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChild("Humanoid")
+    local foot = char:FindFirstChild("LeftFoot") or char:FindFirstChild("Left Leg")
+    
+    if not (hrp and hum and foot) then continue end
+    
+    local rayParams = RaycastParams.new()
+    rayParams.FilterDescendantsInstances = {char}
+    rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+    
+    local result = workspace:Raycast(foot.Position, hrp.CFrame.LookVector * 2, rayParams)
+    
+    if result then
+        hum.PlatformStand = true
+        hum:ChangeState(Enum.HumanoidStateType.Climbing)
+        local v = hrp.Velocity
+        hrp.Velocity = Vector3.new(v.X, CLIMB_SPEED, v.Z)
+    else
+        hum.PlatformStand = false
+        hum:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+    end
+end
 ```

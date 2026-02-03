@@ -1,6 +1,6 @@
 # Custom Match Scripts
 
-These scripts work ONLY in the Roblox Bedwars Custom Game Script tab. It CANNOT get you banned, and it is NOT going to work outside of Roblox Bedwars
+These scripts work ONLY in the Roblox Bedwars Custom Game Script tab. It CANNOT get you banned, and it is NOT going to work outside of Roblox Bedwars.
 
 ## Aimbot
 ```lua
@@ -80,7 +80,7 @@ task.spawn(function()
             if safePos then
                 ent:setPosition(safePos + Vector3.new(0,5,0))
                 if ent.setVelocity then
-                    ent:setVelocity(Vector3.zero)
+                    ent:setVelocity(Vector3.new(0,0,0))
                 end
             end
         else
@@ -141,7 +141,7 @@ end
 ```lua
 local YOUR_NAME = "DeathKiller19386"  -- your username
 
-Events.EntityDamage(function(event)
+Events.EntityDamage:Connect(function(event)
     local p = event.entity:getPlayer()
     if p and p.name == YOUR_NAME then
         event.cancelled = true
@@ -160,7 +160,10 @@ local DELAY = 0.3
 
 local me
 for _, p in PlayerService.getPlayers() do
-    if p.name == YOUR_NAME then me = p break end
+    if p.name == YOUR_NAME then
+        me = p
+        break
+    end
 end
 
 task.spawn(function()
@@ -185,7 +188,8 @@ task.spawn(function()
     end
 end)
 ```
-# Reach
+
+## Reach
 
 ```lua
 local YOUR_NAME = "DeathKiller19386"
@@ -215,7 +219,10 @@ local YOUR_NAME = "DeathKiller19386"  -- your username
 
 local me
 for _, p in PlayerService.getPlayers() do
-    if p.name == YOUR_NAME then me = p break end
+    if p.name == YOUR_NAME then
+        me = p
+        break
+    end
 end
 
 while task.wait() do

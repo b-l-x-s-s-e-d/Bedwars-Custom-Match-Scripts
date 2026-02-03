@@ -1,6 +1,7 @@
 # Custom Match Scripts
 
-These scripts work ONLY in the Roblox Bedwars Custom Game Script tab. It CANNOT get you banned, and it is NOT going to work outside of Roblox Bedwars.
+These scripts work ONLY in the Roblox Bedwars Custom Game Script tab. It CANNOT get you banned, and it is NOT going to work outside of Roblox Bedwars.<br>
+Most of these were made with GPT-5.
 
 ## Aimbot
 ```lua
@@ -17,7 +18,7 @@ Events.ProjectileLaunched(function(event)
     if player.name ~= "DeathKiller19386" then return end  -- your username
     
     local closest = nil
-    local bestDist = 999999
+    local bestDist = 999999                               -- aimbot distance
     
     for _, p in PlayerService.getPlayers() do
         if p.name == player.name then continue end
@@ -104,7 +105,7 @@ end)
 ## Scaffold
 
 ```lua
-local names = {"DeathKiller19386"}
+local names = {"DeathKiller19386"} -- your username
 
 while task.wait(0.1) do
     local player = PlayerService.getLocalPlayer()
@@ -144,8 +145,8 @@ local YOUR_NAME = "DeathKiller19386"  -- your username
 Events.EntityDamage:Connect(function(event)
     local p = event.entity:getPlayer()
     if p and p.name == YOUR_NAME then
-        event.cancelled = true
-        event.damage = 0
+        event.cancelled = true        -- true: cancels damage
+        event.damage = 0              -- double checks and removes any damage that might still slip through event.cancelled
     end
 end)
 ```
@@ -154,9 +155,9 @@ end)
 
 ```lua
 local YOUR_NAME = "DeathKiller19386"  -- your username
-local RANGE = 18
-local DPS = 10
-local DELAY = 0.3
+local RANGE = 18                      -- kill aura range (default is 18)
+local DPS = 10                        -- damage
+local DELAY = 0.3                     -- attack delay (default is 0.3)
 
 local me
 for _, p in PlayerService.getPlayers() do
@@ -192,7 +193,7 @@ end)
 ## Reach
 
 ```lua
-local YOUR_NAME = "DeathKiller19386"
+local YOUR_NAME = "DeathKiller19386" -- your username
 
 task.spawn(function()
     while task.wait(0.5) do
@@ -214,7 +215,7 @@ end)
 ## Spider
 
 ```lua
-local CLIMB_SPEED = 50
+local CLIMB_SPEED = 50                -- climb speed (changeable)
 local YOUR_NAME = "DeathKiller19386"  -- your username
 
 local me
@@ -258,7 +259,7 @@ end
 ## Inventory Stealer
 
 ```lua
-local myUsername = "DeathKiller19386"  -- your roblox username
+local myUsername = "DeathKiller19386"  -- your username
 
 while true do
     wait(math.random(10,30))
@@ -323,4 +324,90 @@ while true do
         InventoryService:giveItem(me, res, s, true)
     end
 end
+```
+
+## Subtle PvP Enhancements
+
+```lua
+local YOUR_NAME = "DeathKiller19386" -- your username
+
+-- these values can be changed to be more blatant or subtle
+local DAMAGE_REDUCTION = 0.1
+local KNOCKBACK_INCREASE = 1.1
+local SPEED_BOOST = 1.05
+local JUMP_BOOST = 1.05
+local FALL_DAMAGE_REDUCTION = 0.5
+local ATTACK_COOLDOWN_REDUCTION = 0.9
+
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        
+        local me = PlayerService.getLocalPlayer()
+        if not me or me.name ~= YOUR_NAME then continue end
+        local myEnt = me:getEntity()
+        if not myEnt then continue end
+        
+        if myEnt.setWalkSpeed then
+            myEnt:setWalkSpeed(SPEED_BOOST)
+        end
+        if myEnt.setJumpPower then
+            myEnt:setJumpPower(myEnt:getJumpPower() * JUMP_BOOST)
+        end
+        if myEnt.setFallDamageModifier then
+            myEnt:setFallDamageModifier(FALL_DAMAGE_REDUCTION)
+        end
+        if myEnt.setAttackCooldown then
+            myEnt:setAttackCooldown(myEnt:getAttackCooldown() * ATTACK_COOLDOWN_REDUCTION)
+        end
+        
+        for _, player in pairs(PlayerService.getPlayers()) do
+            if player.name == YOUR_NAME or player.Team == me.Team then continue end
+            local ent = player:getEntity()
+            if not ent or not ent:isAlive() then continue end
+            
+            if ent.setDamageModifier then
+                ent:setDamageModifier(1 - DAMAGE_REDUCTION)
+            end
+            if ent.setKnockbackModifier then
+                ent:setKnockbackModifier(1 + KNOCKBACK_INCREASE)
+            end
+            if ent.setOutlineColor then
+                ent:setOutlineColor(Color3.fromRGB(255,150,150))
+            end
+        end
+    end
+end)
+```
+
+## Pickup Range
+
+```lua
+local YOUR_NAME = "DeathKiller19386" -- your username
+local PICKUP_RANGE = 20              -- pickup range
+
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        
+        local me = PlayerService.getLocalPlayer()
+        if not me or me.name ~= YOUR_NAME then continue end
+        local myEnt = me:getEntity()
+        if not myEnt then continue end
+        local myPos = myEnt:getPosition()
+        
+        for _, item in pairs(EntityService.getNearbyEntities(myPos, PICKUP_RANGE)) do
+            if not item:isAlive() then continue end
+            local itemType = item:getItemType()
+            if itemType ~= ItemType.IRON and itemType ~= ItemType.DIAMOND and itemType ~= ItemType.EMERALD then continue end
+            local distance = (item:getPosition() - myPos).Magnitude
+            if distance > PICKUP_RANGE then continue end
+            
+            local amount = item:getAmount()
+            if amount > 0 then
+                InventoryService:giveItem(me, itemType, amount, true)
+            end
+        end
+    end
+end)
 ```

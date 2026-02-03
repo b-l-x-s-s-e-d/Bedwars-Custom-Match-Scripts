@@ -55,6 +55,78 @@ Events.ProjectileLaunched(function(event)
 end)
 ```
 
+## Fly
+For an easier alternative, type `/fly` into the chat to enable flight, and `/unfly` to disable
+
+```lua
+local YOUR_NAME = "DeathKiller19386"     -- your username
+local FLY_SPEED = 50                     -- movement speed (vertical included)
+local UP_KEY = Enum.KeyCode.Space
+local DOWN_KEY = Enum.KeyCode.LeftShift
+
+local UserInput = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local me
+for _, p in pairs(PlayerService.getPlayers()) do
+    if p.name == PLAYER_NAME then
+        me = p
+        break
+    end
+end
+
+local flyVelocity = Vector3.new(0,0,0)
+
+local keysDown = {}
+
+UserInput.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.UserInputType == Enum.UserInputType.Keyboard then
+        keysDown[input.KeyCode] = true
+    end
+end)
+
+UserInput.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Keyboard then
+        keysDown[input.KeyCode] = nil
+    end
+end)
+
+RunService.Heartbeat:Connect(function(deltaTime)
+    if not me then return end
+    local ent = me:getEntity()
+    if not ent or not ent:isAlive() then return end
+
+    local hrp = ent:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    flyVelocity = Vector3.new(0,0,0)
+
+    if keysDown[UP_KEY] then
+        flyVelocity = flyVelocity + Vector3.new(0, FLY_SPEED, 0)
+    end
+    if keysDown[DOWN_KEY] then
+        flyVelocity = flyVelocity + Vector3.new(0, -FLY_SPEED, 0)
+    end
+
+    local moveDir = ent:getLookVector()  -- assuming this exists in Bedwars Custom
+    if keysDown[Enum.KeyCode.W] then
+        flyVelocity = flyVelocity + moveDir * FLY_SPEED
+    end
+    if keysDown[Enum.KeyCode.S] then
+        flyVelocity = flyVelocity - moveDir * FLY_SPEED
+    end
+    if keysDown[Enum.KeyCode.A] then
+        flyVelocity = flyVelocity + hrp.CFrame.RightVector * -FLY_SPEED
+    end
+    if keysDown[Enum.KeyCode.D] then
+        flyVelocity = flyVelocity + hrp.CFrame.RightVector * FLY_SPEED
+    end
+
+    hrp.Velocity = flyVelocity
+end)
+```
+
 ## Anti-Void
 
 ```lua

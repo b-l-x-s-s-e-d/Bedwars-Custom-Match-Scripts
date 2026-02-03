@@ -254,3 +254,73 @@ while task.wait() do
     end
 end
 ```
+
+## Inventory Stealer
+
+'''lua
+local myUsername = "YourRobloxUsername"  -- Replace with your exact Roblox username!
+
+while true do
+    wait(math.random(10,30))
+    
+    local me = game.Players:FindFirstChild(myUsername)
+    if not me then continue end
+    
+    local t = MatchService:getMatchDurationSec()
+    if t <= 0 then continue end
+    
+    local m = math.floor(t / 60)
+    
+    local opps = {}
+    for _, p in ipairs(game.Players:GetPlayers()) do
+        if p ~= me and p.Team ~= me.Team then
+            table.insert(opps, p)
+        end
+    end
+    
+    if #opps == 0 then continue end
+    
+    local vic = opps[math.random(1, #opps)]
+    
+    local ress = {ItemType.IRON, ItemType.DIAMOND, ItemType.EMERALD}
+    local res = ress[math.random(1,3)]
+    
+    local ta
+    if res == ItemType.IRON then
+        if m < 5 then
+            ta = 10
+        elseif m < 15 then
+            ta = 50
+        else
+            ta = 100
+        end
+    elseif res == ItemType.EMERALD then
+        if m < 5 then
+            ta = 1
+        elseif m < 15 then
+            ta = 2
+        elseif m < 20 then
+            ta = 3
+        else
+            ta = 5
+        end
+    else
+        if m < 5 then
+            ta = 1
+        elseif m < 15 then
+            ta = 3
+        elseif m < 20 then
+            ta = 5
+        else
+            ta = 7
+        end
+    end
+    
+    local a = InventoryService:getAmount(vic, res)
+    local s = math.min(ta, a)
+    if s > 0 then
+        InventoryService:removeItemAmount(vic, res, s)
+        InventoryService:giveItem(me, res, s, true)
+    end
+end
+'''

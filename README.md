@@ -1,6 +1,6 @@
 # Custom Match Scripts
 
-These scripts work ONLY in the Roblox Bedwars Custom Game Script tab. It CANNOT get you banned, and it is NOT going to work outside of Roblox Bedwars.<br>
+These scripts work **ONLY** in the Roblox Bedwars Custom Game Script tab. It **CANNOT** get you banned, and it is **NOT** going to work outside of Roblox Bedwars.<br>
 Most of these were made with GPT-5.
 
 ## Aimbot
@@ -18,7 +18,7 @@ Events.ProjectileLaunched(function(event)
     if player.name ~= "DeathKiller19386" then return end  -- your username
     
     local closest = nil
-    local bestDist = 999999                               -- aimbot distance
+    local bestDist = math.huge                            -- aimbot distance (math.huge = infinite)
     
     for _, p in PlayerService.getPlayers() do
         if p.name == player.name then continue end

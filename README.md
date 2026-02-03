@@ -1,7 +1,19 @@
 # Custom Match Scripts
 
 These scripts work **ONLY** in the Roblox Bedwars Custom Game Script tab. It **CANNOT** get you banned, and it is **NOT** going to work outside of Roblox Bedwars.<br>
-Most of these were made with GPT-5.
+Most of these were made with GPT-5.<br><br>
+If any of these scripts do not work. Troubleshooting is provided at the bottom.
+
+## How to Use
+
+1. Open Roblox Bedwars
+2. Create a Custom Game and make sure you are the host
+3. Press the 3 dots (⋮) on the top right corner and click "Scripts"
+4. Create a new script and copy your desired script
+5. Replace `YOUR_NAME` with your Roblox username
+6. Save the script, then press run. The script should be running now
+7. If you update the script, make sure to resave it and rerun it
+
 
 ## Aimbot
 ```lua
@@ -411,3 +423,20 @@ task.spawn(function()
     end
 end)
 ```
+
+## Troubleshooting
+
+**Problem:** Getting anti-cheated while using some scripts
+**Solution:** Run this command in chat: `/setac disabled`
+
+**Problem:** Some scripts are not working
+**Solution:** Make sure that the whole script was pasted, and make sure your username is correct and in the right places. If none of these work, wait for an update
+
+**Problem:** Scripts affecting teammates
+**Solution:** Ensure only your username is in the `local YOUR_NAME = ...` or similar
+
+## Credits
+
+- Written and maintained by Joseph (Pluto).
+- Uses Roblox Bedwars API functions like PlayerService, EntityService, CombatService, and InventoryService.
+

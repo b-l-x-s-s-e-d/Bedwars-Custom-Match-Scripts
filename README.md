@@ -426,13 +426,13 @@ end)
 
 ## Troubleshooting
 
-**Problem:** Getting anti-cheated while using some scripts
+**Problem:** Getting anti-cheated while using some scripts<br?
 **Solution:** Run this command in chat: `/setac disabled`
 
-**Problem:** Some scripts are not working
+**Problem:** Some scripts are not working<br>
 **Solution:** Make sure that the whole script was pasted, and make sure your username is correct and in the right places. If none of these work, wait for an update
 
-**Problem:** Scripts affecting teammates
+**Problem:** Scripts affecting teammates<br>
 **Solution:** Ensure only your username is in the `local YOUR_NAME = ...` or similar
 
 ## Credits

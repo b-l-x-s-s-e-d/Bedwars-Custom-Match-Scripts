@@ -496,6 +496,107 @@ task.spawn(function()
 end)
 ```
 
+## AutoWin (NEW!)
+
+```lua
+local USERNAME = "DeathKiller19386"  -- your username
+
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local hostPlayer = nil
+for _, player in ipairs(Players:GetPlayers()) do
+  if player.Name == USERNAME then
+    hostPlayer = player
+    break
+  end
+end
+
+if not hostPlayer or not hostPlayer.Character then
+  error("Host player not found or no character")
+end
+
+local humanoidRootPart = hostPlayer.Character:WaitForChild("HumanoidRootPart")
+
+local function getActiveTeams()
+  local teams = {}
+  local bedwarsTeams = ReplicatedStorage:FindFirstChild("Teams") or Workspace:FindFirstChild("Teams")
+  if not bedwarsTeams then return teams end
+  
+  for _, team in ipairs(bedwarsTeams:GetChildren()) do
+    local teamPlayers = {}
+    for _, player in ipairs(Players:GetPlayers()) do
+      if player.Team == team and player ~= hostPlayer then
+        table.insert(teamPlayers, player)
+      end
+    end
+    if #teamPlayers > 0 then
+      table.insert(teams, {Team = team, Players = teamPlayers})
+    end
+  end
+  return teams
+end
+
+local function getTeamBed(team)
+  local bedsFolder = Workspace:FindFirstChild("Beds") or Workspace:FindFirstChild("Map"):FindFirstChild("Beds")
+  if not bedsFolder then return nil end
+  
+  for _, bed in ipairs(bedsFolder:GetChildren()) do
+    if bed:IsA("Model") and bed.Name:find(team.Name) or bed:FindFirstChild("TeamTag") and bed.TeamTag.Value == team then
+      local bedPart = bed:FindFirstChildWhichIsA("BasePart")
+      if bedPart then
+        return bedPart
+      end
+    end
+  end
+  return nil
+end
+
+local function incrementalTP(targetPosition, stepSize)
+  stepSize = stepSize or 5
+  local currentPos = humanoidRootPart.Position
+  local direction = (targetPosition - currentPos).Unit
+  local distance = (targetPosition - currentPos).Magnitude
+  
+  while distance > stepSize do
+    currentPos = currentPos + direction * stepSize
+    humanoidRootPart.CFrame = CFrame.new(currentPos)
+    wait(0.1)                                              -- TP delay time
+    distance = (targetPosition - currentPos).Magnitude
+  end
+  humanoidRootPart.CFrame = CFrame.new(targetPosition)
+end
+
+local function destroyBed(bedPart)
+  if bedPart then
+    bedPart:Destroy()
+  end
+end
+
+local function killTeamPlayers(teamPlayers)
+  for _, player in ipairs(teamPlayers) do
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+      incrementalTP(player.Character.HumanoidRootPart.Position, 5)
+      player.Character.Humanoid.Health = 0
+    end
+  end
+end
+
+local activeTeams = getActiveTeams()
+for _, teamData in ipairs(activeTeams) do
+  local bedPart = getTeamBed(teamData.Team)
+  if bedPart then
+    local bedPos = bedPart.Position + Vector3.new(0, 5, 0)
+    incrementalTP(bedPos, 5)
+    
+    destroyBed(bedPart)
+    
+    killTeamPlayers(teamData.Players)
+  end
+end
+```
+
 ## Troubleshooting
 
 **Problem:** Getting anti-cheated while using some scripts<br>

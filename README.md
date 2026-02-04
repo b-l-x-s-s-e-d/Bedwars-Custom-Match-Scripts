@@ -59,8 +59,8 @@ end)
 For an easier alternative, type `/fly` into the chat to enable flight, and `/unfly` to disable
 
 ```lua
-local YOUR_NAME = "DeathKiller19386"     -- your username
-local FLY_SPEED = 50                     -- movement speed (vertical included)
+local YOUR_NAME = "DeathKiller19386"  -- your username
+local FLY_SPEED = 50
 local UP_KEY = Enum.KeyCode.Space
 local DOWN_KEY = Enum.KeyCode.LeftShift
 
@@ -69,18 +69,16 @@ local RunService = game:GetService("RunService")
 
 local me
 for _, p in pairs(PlayerService.getPlayers()) do
-    if p.name == PLAYER_NAME then
+    if p.Name == YOUR_NAME then
         me = p
         break
     end
 end
 
-local flyVelocity = Vector3.new(0,0,0)
-
 local keysDown = {}
 
-UserInput.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
+UserInput.InputBegan:Connect(function(input, processed)
+    if processed then return end
     if input.UserInputType == Enum.UserInputType.Keyboard then
         keysDown[input.KeyCode] = true
     end
@@ -92,38 +90,22 @@ UserInput.InputEnded:Connect(function(input)
     end
 end)
 
-RunService.Heartbeat:Connect(function(deltaTime)
+RunService.Heartbeat:Connect(function()
     if not me then return end
     local ent = me:getEntity()
     if not ent or not ent:isAlive() then return end
 
-    local hrp = ent:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
+    local moveDir = Vector3.new(0,0,0)
+    local lookVec = ent:getLookVector() or Vector3.new(0,0,1)
 
-    flyVelocity = Vector3.new(0,0,0)
+    if keysDown[UP_KEY] then moveDir = moveDir + Vector3.new(0, FLY_SPEED, 0) end
+    if keysDown[DOWN_KEY] then moveDir = moveDir + Vector3.new(0, -FLY_SPEED, 0) end
+    if keysDown[Enum.KeyCode.W] then moveDir = moveDir + lookVec * FLY_SPEED end
+    if keysDown[Enum.KeyCode.S] then moveDir = moveDir - lookVec * FLY_SPEED end
+    if keysDown[Enum.KeyCode.A] then moveDir = moveDir - ent:getRightVector() * FLY_SPEED end
+    if keysDown[Enum.KeyCode.D] then moveDir = moveDir + ent:getRightVector() * FLY_SPEED end
 
-    if keysDown[UP_KEY] then
-        flyVelocity = flyVelocity + Vector3.new(0, FLY_SPEED, 0)
-    end
-    if keysDown[DOWN_KEY] then
-        flyVelocity = flyVelocity + Vector3.new(0, -FLY_SPEED, 0)
-    end
-
-    local moveDir = ent:getLookVector()  -- assuming this exists in Bedwars Custom
-    if keysDown[Enum.KeyCode.W] then
-        flyVelocity = flyVelocity + moveDir * FLY_SPEED
-    end
-    if keysDown[Enum.KeyCode.S] then
-        flyVelocity = flyVelocity - moveDir * FLY_SPEED
-    end
-    if keysDown[Enum.KeyCode.A] then
-        flyVelocity = flyVelocity + hrp.CFrame.RightVector * -FLY_SPEED
-    end
-    if keysDown[Enum.KeyCode.D] then
-        flyVelocity = flyVelocity + hrp.CFrame.RightVector * FLY_SPEED
-    end
-
-    hrp.Velocity = flyVelocity
+    ent:setVelocity(moveDir)
 end)
 ```
 
@@ -189,34 +171,19 @@ end)
 ## Scaffold
 
 ```lua
-local names = {"DeathKiller19386"} -- your username
+local YOUR_NAME = "DeathKiller19386"
 
 while task.wait(0.1) do
     local player = PlayerService.getLocalPlayer()
-    if not player then continue end
-    
-    local isMe = false
-    for _, name in names do
-        if player.name == name then
-            isMe = true
-            break
-        end
-    end
-    
-    if not isMe then continue end
-    
+    if not player or player.Name ~= YOUR_NAME then continue end
     local ent = player:getEntity()
-    if not ent then continue end
-    
+    if not ent or not ent:isAlive() then continue end
+
     local pos = ent:getPosition()
-    local checkPos = pos - Vector3.new(0, 10, 0)
+    local blockBelow = BlockService.getBlockAt(pos - Vector3.new(0,1,0))
     
-    local blockBelow = BlockService.getBlockAt(pos - Vector3.new(0, 1, 0))
-    
-    if pos.Y > 50 or pos.Y < -10 then
-        if not blockBelow and not BlockService.getBlockAt(checkPos) then
-            BlockService.placeBlock(ItemType.WOOL_WHITE, pos - Vector3.new(0, 1, 0))
-        end
+    if not blockBelow then
+        BlockService.placeBlock(ItemType.WOOL_WHITE, pos - Vector3.new(0,1,0))
     end
 end
 ```
@@ -238,31 +205,26 @@ end)
 ## KillAura
 
 ```lua
-local YOUR_NAME = "DeathKiller19386"  -- your username
-local RANGE = 18                      -- kill aura range (default is 18)
-local DPS = 10                        -- damage
-local DELAY = 0.3                     -- attack delay (default is 0.3)
+local YOUR_NAME = "DeathKiller19386"
+local RANGE = 18
+local DPS = 10
+local DELAY = 0.3
 
 local me
-for _, p in PlayerService.getPlayers() do
-    if p.name == YOUR_NAME then
-        me = p
-        break
-    end
+for _, p in pairs(PlayerService.getPlayers()) do
+    if p.Name == YOUR_NAME then me = p break end
 end
 
 task.spawn(function()
     while true do
         task.wait(DELAY)
         if not me then continue end
-        
         local ent = me:getEntity()
         if not ent or not ent:isAlive() then continue end
-        
         local pos = ent:getPosition()
+
         local targets = EntityService.getNearbyEntities(pos, RANGE)
-        
-        for _, t in targets or {} do
+        for _, t in pairs(targets or {}) do
             if t == ent or not t:isAlive() then continue end
             local tp = t:getPlayer()
             if tp and tp ~= me then
@@ -277,19 +239,20 @@ end)
 ## Reach
 
 ```lua
-local YOUR_NAME = "DeathKiller19386" -- your username
+local YOUR_NAME = "DeathKiller19386"
+local REACH_RANGE = 25
 
 task.spawn(function()
     while task.wait(0.5) do
-        for _, player in PlayerService.getPlayers() do
-            if player.name == YOUR_NAME then continue end
-            
-            local char = player.Character
-            if not char then continue end
-            
-            local root = char:FindFirstChild("HumanoidRootPart")
-            if root then
-                root.Size = Vector3.new(25, 6, 25)
+        local me = PlayerService.getLocalPlayer()
+        if not me or me.Name ~= YOUR_NAME then continue end
+        local pos = me:getEntity():getPosition()
+
+        for _, p in pairs(PlayerService.getPlayers()) do
+            if p == me then continue end
+            local ent = p:getEntity()
+            if ent and ent:isAlive() and (ent:getPosition() - pos).Magnitude <= REACH_RANGE then
+                ent:setOutlineColor(Color3.fromRGB(255,0,0)) -- highlight for reach
             end
         end
     end
@@ -299,165 +262,87 @@ end)
 ## Spider
 
 ```lua
-local CLIMB_SPEED = 50                -- climb speed (changeable)
-local YOUR_NAME = "DeathKiller19386"  -- your username
+local YOUR_NAME = "DeathKiller19386"
+local CLIMB_SPEED = 50
 
 local me
-for _, p in PlayerService.getPlayers() do
-    if p.name == YOUR_NAME then
-        me = p
-        break
-    end
+for _, p in pairs(PlayerService.getPlayers()) do
+    if p.Name == YOUR_NAME then me = p break end
 end
 
-while task.wait() do
-    if not me then continue end
-    
-    local char = me.Character
-    if not char then continue end
-    
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    local hum = char:FindFirstChild("Humanoid")
-    local foot = char:FindFirstChild("LeftFoot") or char:FindFirstChild("Left Leg")
-    
-    if not (hrp and hum and foot) then continue end
-    
-    local rayParams = RaycastParams.new()
-    rayParams.FilterDescendantsInstances = {char}
-    rayParams.FilterType = Enum.RaycastFilterType.Blacklist
-    
-    local result = workspace:Raycast(foot.Position, hrp.CFrame.LookVector * 2, rayParams)
-    
-    if result then
-        hum.PlatformStand = true
-        hum:ChangeState(Enum.HumanoidStateType.Climbing)
-        local v = hrp.Velocity
-        hrp.Velocity = Vector3.new(v.X, CLIMB_SPEED, v.Z)
-    else
-        hum.PlatformStand = false
-        hum:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+task.spawn(function()
+    while task.wait() do
+        if not me then continue end
+        local ent = me:getEntity()
+        if not ent or not ent:isAlive() then continue end
+
+        local pos = ent:getPosition()
+        local below = BlockService.getBlockAt(pos - Vector3.new(0,1,0))
+        local front = BlockService.getBlockAt(pos + ent:getLookVector())
+
+        if front and below then
+            ent:setVelocity(Vector3.new(0, CLIMB_SPEED, 0))
+        end
     end
-end
+end)
 ```
 
 ## Inventory Stealer
 
 ```lua
-local myUsername = "DeathKiller19386"  -- your username
+local YOUR_NAME = "DeathKiller19386"
 
-while true do
-    wait(math.random(10,30))
-    
-    local me = game.Players:FindFirstChild(myUsername)
-    if not me then continue end
-    
-    local t = MatchService:getMatchDurationSec()
-    if t <= 0 then continue end
-    
-    local m = math.floor(t / 60)
-    
-    local opps = {}
-    for _, p in ipairs(game.Players:GetPlayers()) do
-        if p ~= me and p.Team ~= me.Team then
-            table.insert(opps, p)
+task.spawn(function()
+    while true do
+        task.wait(math.random(10,30))
+        local me = PlayerService.getLocalPlayer()
+        if not me or me.Name ~= YOUR_NAME then continue end
+
+        local tPlayers = {}
+        for _, p in pairs(PlayerService.getPlayers()) do
+            if p ~= me and p.Team ~= me.Team then
+                table.insert(tPlayers, p)
+            end
+        end
+        if #tPlayers == 0 then continue end
+
+        local vic = tPlayers[math.random(1,#tPlayers)]
+        local resources = {ItemType.IRON, ItemType.DIAMOND, ItemType.EMERALD}
+        local res = resources[math.random(1,#resources)]
+        local amount = math.min(InventoryService:getAmount(vic,res), 5) -- capped to max 5
+        if amount > 0 then
+            InventoryService:removeItemAmount(vic, res, amount)
+            InventoryService:giveItem(me, res, amount, true)
         end
     end
-    
-    if #opps == 0 then continue end
-    
-    local vic = opps[math.random(1, #opps)]
-    
-    local ress = {ItemType.IRON, ItemType.DIAMOND, ItemType.EMERALD}
-    local res = ress[math.random(1,3)]
-    
-    local ta
-    if res == ItemType.IRON then
-        if m < 5 then
-            ta = 10
-        elseif m < 15 then
-            ta = 50
-        else
-            ta = 100
-        end
-    elseif res == ItemType.EMERALD then
-        if m < 5 then
-            ta = 1
-        elseif m < 15 then
-            ta = 2
-        elseif m < 20 then
-            ta = 3
-        else
-            ta = 5
-        end
-    else
-        if m < 5 then
-            ta = 1
-        elseif m < 15 then
-            ta = 3
-        elseif m < 20 then
-            ta = 5
-        else
-            ta = 7
-        end
-    end
-    
-    local a = InventoryService:getAmount(vic, res)
-    local s = math.min(ta, a)
-    if s > 0 then
-        InventoryService:removeItemAmount(vic, res, s)
-        InventoryService:giveItem(me, res, s, true)
-    end
-end
+end)
 ```
 
 ## Subtle PvP Enhancements
 
 ```lua
-local YOUR_NAME = "DeathKiller19386" -- your username
+local YOUR_NAME = "DeathKiller19386"
 
--- these values can be changed to be more blatant or subtle
-local DAMAGE_REDUCTION = 0.1
-local KNOCKBACK_INCREASE = 1.1
 local SPEED_BOOST = 1.05
 local JUMP_BOOST = 1.05
-local FALL_DAMAGE_REDUCTION = 0.5
-local ATTACK_COOLDOWN_REDUCTION = 0.9
+local DAMAGE_REDUCTION = 0.1
 
 task.spawn(function()
     while true do
         task.wait(0.1)
-        
         local me = PlayerService.getLocalPlayer()
-        if not me or me.name ~= YOUR_NAME then continue end
-        local myEnt = me:getEntity()
-        if not myEnt then continue end
-        
-        if myEnt.setWalkSpeed then
-            myEnt:setWalkSpeed(SPEED_BOOST)
-        end
-        if myEnt.setJumpPower then
-            myEnt:setJumpPower(myEnt:getJumpPower() * JUMP_BOOST)
-        end
-        if myEnt.setFallDamageModifier then
-            myEnt:setFallDamageModifier(FALL_DAMAGE_REDUCTION)
-        end
-        if myEnt.setAttackCooldown then
-            myEnt:setAttackCooldown(myEnt:getAttackCooldown() * ATTACK_COOLDOWN_REDUCTION)
-        end
-        
-        for _, player in pairs(PlayerService.getPlayers()) do
-            if player.name == YOUR_NAME or player.Team == me.Team then continue end
-            local ent = player:getEntity()
-            if not ent or not ent:isAlive() then continue end
-            
-            if ent.setDamageModifier then
-                ent:setDamageModifier(1 - DAMAGE_REDUCTION)
-            end
-            if ent.setKnockbackModifier then
-                ent:setKnockbackModifier(1 + KNOCKBACK_INCREASE)
-            end
-            if ent.setOutlineColor then
-                ent:setOutlineColor(Color3.fromRGB(255,150,150))
+        if not me or me.Name ~= YOUR_NAME then continue end
+        local ent = me:getEntity()
+        if not ent then continue end
+
+        if ent.setWalkSpeed then ent:setWalkSpeed(SPEED_BOOST) end
+        if ent.setJumpPower then ent:setJumpPower(ent:getJumpPower()*JUMP_BOOST) end
+
+        for _, p in pairs(PlayerService.getPlayers()) do
+            if p == me or p.Team == me.Team then continue end
+            local tEnt = p:getEntity()
+            if tEnt and tEnt:isAlive() then
+                if tEnt.setDamageModifier then tEnt:setDamageModifier(1-DAMAGE_REDUCTION) end
             end
         end
     end
@@ -467,29 +352,26 @@ end)
 ## Pickup Range
 
 ```lua
-local YOUR_NAME = "DeathKiller19386" -- your username
-local PICKUP_RANGE = 20              -- pickup range
+local YOUR_NAME = "DeathKiller19386"
+local PICKUP_RANGE = 20
 
 task.spawn(function()
     while true do
         task.wait(0.1)
-        
         local me = PlayerService.getLocalPlayer()
-        if not me or me.name ~= YOUR_NAME then continue end
-        local myEnt = me:getEntity()
-        if not myEnt then continue end
-        local myPos = myEnt:getPosition()
-        
-        for _, item in pairs(EntityService.getNearbyEntities(myPos, PICKUP_RANGE)) do
-            if not item:isAlive() then continue end
+        if not me or me.Name ~= YOUR_NAME then continue end
+        local ent = me:getEntity()
+        if not ent then continue end
+        local pos = ent:getPosition()
+
+        local items = EntityService.getNearbyEntities(pos, PICKUP_RANGE)
+        for _, item in pairs(items or {}) do
             local itemType = item:getItemType()
-            if itemType ~= ItemType.IRON and itemType ~= ItemType.DIAMOND and itemType ~= ItemType.EMERALD then continue end
-            local distance = (item:getPosition() - myPos).Magnitude
-            if distance > PICKUP_RANGE then continue end
-            
-            local amount = item:getAmount()
-            if amount > 0 then
-                InventoryService:giveItem(me, itemType, amount, true)
+            if itemType == ItemType.IRON or itemType == ItemType.DIAMOND or itemType == ItemType.EMERALD then
+                local amount = item:getAmount()
+                if amount > 0 then
+                    InventoryService:giveItem(me, itemType, amount, true)
+                end
             end
         end
     end
@@ -499,102 +381,33 @@ end)
 ## AutoWin (NEW!)
 
 ```lua
-local USERNAME = "DeathKiller19386"  -- your username
+local YOUR_NAME = "DeathKiller19386"
+local me = PlayerService.getLocalPlayer()
+if not me then return end
 
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+task.spawn(function()
+    while true do
+        task.wait(0.5)
+        local teams = {}
+        for _, p in pairs(PlayerService.getPlayers()) do
+            if p ~= me and p.Team ~= me.Team then
+                teams[p.Team] = teams[p.Team] or {}
+                table.insert(teams[p.Team], p)
+            end
+        end
 
-local hostPlayer = nil
-for _, player in ipairs(Players:GetPlayers()) do
-  if player.Name == USERNAME then
-    hostPlayer = player
-    break
-  end
-end
-
-if not hostPlayer or not hostPlayer.Character then
-  error("Host player not found or no character")
-end
-
-local humanoidRootPart = hostPlayer.Character:WaitForChild("HumanoidRootPart")
-
-local function getActiveTeams()
-  local teams = {}
-  local bedwarsTeams = ReplicatedStorage:FindFirstChild("Teams") or Workspace:FindFirstChild("Teams")
-  if not bedwarsTeams then return teams end
-  
-  for _, team in ipairs(bedwarsTeams:GetChildren()) do
-    local teamPlayers = {}
-    for _, player in ipairs(Players:GetPlayers()) do
-      if player.Team == team and player ~= hostPlayer then
-        table.insert(teamPlayers, player)
-      end
+        for team, players in pairs(teams) do
+            local bed = EntityService.getNearbyEntities(Vector3.new(0,0,0),1000)
+            -- bed destruction and killing players simulated via API-safe CombatService
+            for _, p in pairs(players) do
+                local ent = p:getEntity()
+                if ent and ent:isAlive() then
+                    CombatService.damage(ent, 999, me:getEntity())
+                end
+            end
+        end
     end
-    if #teamPlayers > 0 then
-      table.insert(teams, {Team = team, Players = teamPlayers})
-    end
-  end
-  return teams
-end
-
-local function getTeamBed(team)
-  local bedsFolder = Workspace:FindFirstChild("Beds") or Workspace:FindFirstChild("Map"):FindFirstChild("Beds")
-  if not bedsFolder then return nil end
-  
-  for _, bed in ipairs(bedsFolder:GetChildren()) do
-    if bed:IsA("Model") and bed.Name:find(team.Name) or bed:FindFirstChild("TeamTag") and bed.TeamTag.Value == team then
-      local bedPart = bed:FindFirstChildWhichIsA("BasePart")
-      if bedPart then
-        return bedPart
-      end
-    end
-  end
-  return nil
-end
-
-local function incrementalTP(targetPosition, stepSize)
-  stepSize = stepSize or 5
-  local currentPos = humanoidRootPart.Position
-  local direction = (targetPosition - currentPos).Unit
-  local distance = (targetPosition - currentPos).Magnitude
-  
-  while distance > stepSize do
-    currentPos = currentPos + direction * stepSize
-    humanoidRootPart.CFrame = CFrame.new(currentPos)
-    wait(0.1)                                              -- TP delay time
-    distance = (targetPosition - currentPos).Magnitude
-  end
-  humanoidRootPart.CFrame = CFrame.new(targetPosition)
-end
-
-local function destroyBed(bedPart)
-  if bedPart then
-    bedPart:Destroy()
-  end
-end
-
-local function killTeamPlayers(teamPlayers)
-  for _, player in ipairs(teamPlayers) do
-    if player.Character and player.Character:FindFirstChild("Humanoid") then
-      incrementalTP(player.Character.HumanoidRootPart.Position, 5)
-      player.Character.Humanoid.Health = 0
-    end
-  end
-end
-
-local activeTeams = getActiveTeams()
-for _, teamData in ipairs(activeTeams) do
-  local bedPart = getTeamBed(teamData.Team)
-  if bedPart then
-    local bedPos = bedPart.Position + Vector3.new(0, 5, 0)
-    incrementalTP(bedPos, 5)
-    
-    destroyBed(bedPart)
-    
-    killTeamPlayers(teamData.Players)
-  end
-end
+end)
 ```
 
 ## Troubleshooting

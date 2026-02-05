@@ -239,7 +239,7 @@ end)
 ## Reach
 
 ```lua
-local YOUR_NAME = "DeathKiller19386"
+local YOUR_NAME = "DeathKiller19386" -- your username
 local REACH_RANGE = 25
 
 task.spawn(function()
@@ -263,7 +263,24 @@ end)
 
 ```lua
 local YOUR_NAME = "DeathKiller19386" -- your username
-local CLIMB_SPEED = 40
+local CLIMB_SPEED = 35
+
+local UserInput = game:GetService("UserInputService")
+
+local forwardHeld = false
+
+UserInput.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if input.KeyCode == Enum.KeyCode.W then
+        forwardHeld = true
+    end
+end)
+
+UserInput.InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.W then
+        forwardHeld = false
+    end
+end)
 
 task.spawn(function()
     while task.wait(0.05) do
@@ -273,13 +290,21 @@ task.spawn(function()
         local ent = me:getEntity()
         if not ent or not ent:isAlive() then continue end
         
-        local pos = ent:getPosition()
+        if not forwardHeld then continue end
         
-        local forward = ent:getLookVector() * 2
-        local frontBlock = BlockService.getBlockAt(pos + forward)
-
-        if frontBlock then
-            ent:setVelocity(Vector3.new(0, CLIMB_SPEED, 0))
+        local pos = ent:getPosition()
+        local look = ent:getLookVector()
+        
+        -- small forward offset at chest height
+        local checkPos = pos + Vector3.new(0,2,0) + (look * 2)
+        local wall = BlockService.getBlockAt(checkPos)
+        
+        if wall then
+            ent:setVelocity(Vector3.new(
+                ent:getVelocity().X,
+                CLIMB_SPEED,
+                ent:getVelocity().Z
+            ))
         end
     end
 end)

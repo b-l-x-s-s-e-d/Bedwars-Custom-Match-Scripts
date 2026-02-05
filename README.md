@@ -110,7 +110,7 @@ RunService.Heartbeat:Connect(function()
 end)
 ```
 
-## - [x] Anti-Void
+- ##  [x] Anti-Void
 
 ```lua
 local YOUR_NAME = "DeathKiller19386"  -- your username

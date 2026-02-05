@@ -262,25 +262,23 @@ end)
 ## Spider
 
 ```lua
-local YOUR_NAME = "DeathKiller19386"
-local CLIMB_SPEED = 50
-
-local me
-for _, p in pairs(PlayerService.getPlayers()) do
-    if p.Name == YOUR_NAME then me = p break end
-end
+local YOUR_NAME = "DeathKiller19386" -- your username
+local CLIMB_SPEED = 40
 
 task.spawn(function()
-    while task.wait() do
-        if not me then continue end
+    while task.wait(0.05) do
+        local me = PlayerService.getLocalPlayer()
+        if not me or me.Name ~= YOUR_NAME then continue end
+        
         local ent = me:getEntity()
         if not ent or not ent:isAlive() then continue end
-
+        
         local pos = ent:getPosition()
-        local below = BlockService.getBlockAt(pos - Vector3.new(0,1,0))
-        local front = BlockService.getBlockAt(pos + ent:getLookVector())
+        
+        local forward = ent:getLookVector() * 2
+        local frontBlock = BlockService.getBlockAt(pos + forward)
 
-        if front and below then
+        if frontBlock then
             ent:setVelocity(Vector3.new(0, CLIMB_SPEED, 0))
         end
     end

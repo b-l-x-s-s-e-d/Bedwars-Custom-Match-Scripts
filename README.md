@@ -109,7 +109,7 @@ RunService.Heartbeat:Connect(function()
 end)
 ```
 
-## Anti-Void (100% Working and Tested)
+## [x] Anti-Void
 
 ```lua
 local YOUR_NAME = "DeathKiller19386"  -- your username
@@ -188,16 +188,16 @@ while task.wait(0.1) do
 end
 ```
 
-## GodMode / AntiHit
+## [x] GodMode / AntiHit
 
 ```lua
-local YOUR_NAME = "DeathKiller19386"  -- your username
+local YOUR_NAME = "DeathKiller19386" -- your username
 
-Events.EntityDamage:Connect(function(event)
-    local p = event.entity:getPlayer()
-    if p and p.name == YOUR_NAME then
-        event.cancelled = true        -- true: cancels damage
-        event.damage = 0              -- double checks and removes any damage that might still slip through event.cancelled
+Events.EntityDamage(function(event)
+    local tp = event.entity:getPlayer()
+    if tp and tp.name == YOUR_NAME then
+        event.cancelled = true
+        event.damage = 0
     end
 end)
 ```

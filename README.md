@@ -17,7 +17,7 @@ If any of these scripts have a checkbox next to them, they are 100% working and 
 
 
 ## Aimbot ✅ 
-```lua
+`
 Events.ProjectileLaunched(function(event)
     if event.shooter == nil then return end
     
@@ -54,7 +54,7 @@ Events.ProjectileLaunched(function(event)
     
     CombatService.damage(closest, dmg)
 end)
-```
+`
 
 ## Fly
 For an easier alternative, type `/fly` into the chat to enable flight, and `/unfly` to disable

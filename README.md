@@ -2,7 +2,8 @@
 
 These scripts work **ONLY** in the Roblox Bedwars Custom Game Script tab. It **CANNOT** get you banned, and it is **NOT** going to work outside of Roblox Bedwars.<br>
 Most of these were made with GPT-5.<br><br>
-If any of these scripts do not work. Troubleshooting is provided at the bottom.
+If any of these scripts do not work. Troubleshooting is provided at the bottom.<br>
+If any of these scripts have a checkbox next to them, they are 100% working and tested.
 
 ## How to Use
 
@@ -15,7 +16,7 @@ If any of these scripts do not work. Troubleshooting is provided at the bottom.
 7. If you update the script, make sure to resave it and rerun it
 
 
-## Aimbot
+## - Aimbot
 ```lua
 Events.ProjectileLaunched(function(event)
     if event.shooter == nil then return end
@@ -55,7 +56,7 @@ Events.ProjectileLaunched(function(event)
 end)
 ```
 
-## Fly
+## - Fly
 For an easier alternative, type `/fly` into the chat to enable flight, and `/unfly` to disable
 
 ```lua
@@ -109,7 +110,7 @@ RunService.Heartbeat:Connect(function()
 end)
 ```
 
-## [x] Anti-Void
+## - [x] Anti-Void
 
 ```lua
 local YOUR_NAME = "DeathKiller19386"  -- your username
@@ -168,7 +169,7 @@ Events.EntityDamage:Connect(function(event)
 end)
 ```
 
-## Scaffold
+## - Scaffold
 
 ```lua
 local YOUR_NAME = "DeathKiller19386"
@@ -188,7 +189,7 @@ while task.wait(0.1) do
 end
 ```
 
-## [x] GodMode / AntiHit
+## - [x] GodMode / AntiHit
 
 ```lua
 local YOUR_NAME = "DeathKiller19386" -- your username
@@ -202,7 +203,7 @@ Events.EntityDamage(function(event)
 end)
 ```
 
-## KillAura
+## - KillAura
 
 ```lua
 local YOUR_NAME = "DeathKiller19386"
@@ -236,7 +237,7 @@ task.spawn(function()
 end)
 ```
 
-## Reach
+## - Reach
 
 ```lua
 local YOUR_NAME = "DeathKiller19386" -- your username
@@ -259,7 +260,7 @@ task.spawn(function()
 end)
 ```
 
-## Spider
+## - Spider
 
 ```lua
 local YOUR_NAME = "DeathKiller19386" -- your username
@@ -310,7 +311,7 @@ task.spawn(function()
 end)
 ```
 
-## Inventory Stealer
+## - Inventory Stealer
 
 ```lua
 local YOUR_NAME = "DeathKiller19386"
@@ -341,7 +342,7 @@ task.spawn(function()
 end)
 ```
 
-## Subtle PvP Enhancements
+## - Subtle PvP Enhancements
 
 ```lua
 local YOUR_NAME = "DeathKiller19386"
@@ -372,7 +373,7 @@ task.spawn(function()
 end)
 ```
 
-## Pickup Range
+## - Pickup Range
 
 ```lua
 local YOUR_NAME = "DeathKiller19386"
@@ -401,7 +402,7 @@ task.spawn(function()
 end)
 ```
 
-## AutoWin (NEW!)
+## - AutoWin (NEW!)
 
 ```lua
 local YOUR_NAME = "DeathKiller19386"

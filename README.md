@@ -17,6 +17,8 @@ If any of these scripts have a checkbox next to them, they are 100% working and 
 
 
 ## Aimbot ✅ 
+- Updated arrow damage
+
 ```lua
 Events.ProjectileLaunched(function(event)
     if event.shooter == nil then return end
@@ -47,17 +49,24 @@ Events.ProjectileLaunched(function(event)
     
     if not closest then return end
     
-    local dmg = 25
-    if proj == "crossbow_arrow" then dmg = 35
-    elseif proj == "tactical_crossbow_arrow" then dmg = 50
-    elseif proj:find("headhunter") then dmg = 60 end
+        local dmg = 18  -- bow arrow
+    if proj == "crossbow_arrow" then 
+        dmg = 34  -- crossbow arrow
+    elseif proj == "tactical_crossbow_arrow" then 
+        dmg = 38  -- tactical crossbow arrow
+    elseif proj == "headhunter_arrow" then 
+        dmg = 55  -- headhunter arrow
+    elseif proj == "tactical_headhunter_arrow" then 
+        dmg = 60  -- tactical headhunter arrow
+    end
+
     
     CombatService.damage(closest, dmg)
 end)
 ```
 
 ## Fly
-For an easier alternative, type `/fly` into the chat to enable flight, and `/unfly` to disable
+For an easier alternative, type `/fly` into the chat to enable flight, and `/fly` or `/unfly` to disable
 
 ```lua
 local YOUR_NAME = "DeathKiller19386"  -- your username
@@ -374,10 +383,14 @@ end)
 ```
 
 ## Pickup Range
+- Improved reliability
 
 ```lua
-local YOUR_NAME = "DeathKiller19386"
+local YOUR_NAME = "DeathKiller19386" -- your username
 local PICKUP_RANGE = 20
+local PlayerService = game:GetService("PlayerService")
+local EntityService = game:GetService("EntityService")
+local InventoryService = game:GetService("InventoryService")
 
 task.spawn(function()
     while true do
@@ -385,51 +398,63 @@ task.spawn(function()
         local me = PlayerService.getLocalPlayer()
         if not me or me.Name ~= YOUR_NAME then continue end
         local ent = me:getEntity()
-        if not ent then continue end
+        if not ent or not ent:isAlive() then continue end
         local pos = ent:getPosition()
 
-        local items = EntityService.getNearbyEntities(pos, PICKUP_RANGE)
-        for _, item in pairs(items or {}) do
+        local items = EntityService.getNearbyEntities(pos, PICKUP_RANGE) or {}
+
+        local resources = {ItemType.IRON, ItemType.DIAMOND, ItemType.EMERALD}
+        for _, item in pairs(items) do
             local itemType = item:getItemType()
-            if itemType == ItemType.IRON or itemType == ItemType.DIAMOND or itemType == ItemType.EMERALD then
-                local amount = item:getAmount()
+            if table.find(resources, itemType) then
+                local amount = item:getAmount() or 0
                 if amount > 0 then
                     InventoryService:giveItem(me, itemType, amount, true)
+                    InventoryService:removeItemAmount(item, itemType, amount)
                 end
             end
         end
     end
 end)
 ```
-
-## AutoWin (NEW!)
+## Bow Rapid Fire
 
 ```lua
 local YOUR_NAME = "DeathKiller19386"
-local me = PlayerService.getLocalPlayer()
-if not me then return end
+local FIRE_DELAY = 0.1  -- seconds between shots
+local MAX_RANGE = 100   -- only shoot targets within this range
 
 task.spawn(function()
     while true do
-        task.wait(0.5)
-        local teams = {}
+        task.wait(FIRE_DELAY)
+        
+        local me = PlayerService.getLocalPlayer()
+        if not me or me.Name ~= YOUR_NAME then continue end
+        local ent = me:getEntity()
+        if not ent or not ent:isAlive() then continue end
+        local pos = ent:getPosition()
+        
+        local closest = nil
+        local bestDist = math.huge
         for _, p in pairs(PlayerService.getPlayers()) do
-            if p ~= me and p.Team ~= me.Team then
-                teams[p.Team] = teams[p.Team] or {}
-                table.insert(teams[p.Team], p)
-            end
-        end
-
-        for team, players in pairs(teams) do
-            local bed = EntityService.getNearbyEntities(Vector3.new(0,0,0),1000)
-            -- bed destruction and killing players simulated via API-safe CombatService
-            for _, p in pairs(players) do
-                local ent = p:getEntity()
-                if ent and ent:isAlive() then
-                    CombatService.damage(ent, 999, me:getEntity())
+            if p == me then continue end
+            local targetEnt = p:getEntity()
+            if targetEnt and targetEnt:isAlive() then
+                local dist = (targetEnt:getPosition() - pos).Magnitude
+                if dist < bestDist and dist <= MAX_RANGE then
+                    closest = targetEnt
+                    bestDist = dist
                 end
             end
         end
+        
+        if not closest then continue end
+        
+        local arrowType = "arrow"  -- can also be "crossbow_arrow" or other types
+        local proj = EntityService.spawnProjectile(arrowType, ent:getPosition() + Vector3.new(0,2,0))
+        
+        local dir = (closest:getPosition() - proj:getPosition()).Unit
+        proj:setVelocity(dir * 150)
     end
 end)
 ```
